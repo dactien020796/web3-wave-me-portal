@@ -5,7 +5,7 @@ import abi from "./utils/WavePortal.json";
 
 export default function App() {
 
-  const contractAddress = "0x16bC985aC97f97c6df25D745ADdE155147a3a5AA";
+  const contractAddress = "0x23A68fCe59F2582188De7c9E43bB847aF5647B51";
   const contractABI = abi.abi;
 
   const [currentAccount, setCurrentAccount] = useState("");
@@ -181,7 +181,7 @@ export default function App() {
           </div>
 
           <div className="bio">
-            I am Tien Le <br />Connect your Ethereum wallet and wave at me!
+            I am Tien Le <br />Connect your Metamask wallet and wave at me!
           </div>
 
           <input type='text' className='waveInput' placeholder='Send me a message ;)' onChange={e => setInputValue(e.target.value)} required />

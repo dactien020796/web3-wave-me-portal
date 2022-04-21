@@ -1,19 +1,44 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+describe("WavePortal", function () {
+  const initialBalance = "0.1";
+  const rewardAmount = "0.01";
+  let wavePortal;
+  beforeEach(async () => {
+    const WavePortal = await ethers.getContractFactory("WavePortal");
+    wavePortal = await WavePortal.deploy({ value: ethers.utils.parseEther(initialBalance) });
+    await wavePortal.deployed();
+  });
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+  it("Should return correct balance after deploy", async function () {
+    expect(await wavePortal.getContractBalance()).to.equal(ethers.utils.parseEther(initialBalance));
+  });
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+  it("Should wave successfully", async function () {
+    console.log(ethers.utils.parseEther(initialBalance));
+    await wavePortal.wave("Hello world");
+    expect(await wavePortal.getTotalWaves()).to.equal(1);
+    expect(await wavePortal.getContractBalance()).to.equal((
+      ethers.utils.parseEther(initialBalance) - ethers.utils.parseEther(rewardAmount)
+    ).toString());
+  });
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+  it("Should wave unsuccessfully if there is no money left in contract", async function () {
+    for (let index = 0; index < 10; index++) {
+      await wavePortal.wave("Hello world");
+    }
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+    expect(await wavePortal.getTotalWaves()).to.equal(10);
+    expect(await wavePortal.getContractBalance()).to.equal(0);
+    expect(wavePortal.wave("abc")).to.be.revertedWith("Trying to withdraw more money than the contract has.")
+  });
+
+  it("Should get all waves", async function () {
+    for (let index = 0; index < 10; index++) {
+      await wavePortal.wave("Hello world");
+    }
+    let waves = await wavePortal.getAllWaves();
+    expect(waves.length).to.equal(10);
   });
 });
